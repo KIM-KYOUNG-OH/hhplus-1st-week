@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,8 +30,11 @@ class PointServiceTest {
     @Mock
     private PointHistoryTable pointHistoryTable;
 
+    @Mock
+    private PointLockService pointLockService;
+
     @InjectMocks
-    private PointServiceImpl pointService;
+    private PointService pointService;
 
     @Test
     void 포인트조회_성공() {
@@ -58,7 +62,12 @@ class PointServiceTest {
     }
 
     @Test
-    void 포인트충전_성공() {
+    void 포인트충전_성공() throws InterruptedException {
+        when(pointLockService.executeWithLock(eq(1L), any(Callable.class)))
+                .thenAnswer(invocation -> {
+                    Callable<UserPoint> task = invocation.getArgument(1);
+                    return task.call();
+                });
         UserPoint userPoint = new UserPoint(1L, 1000, System.currentTimeMillis());
         UserPoint postUserPoint = new UserPoint(1L, 1500, System.currentTimeMillis());
         when(userPointTable.selectById(1L)).thenReturn(userPoint);
@@ -72,13 +81,16 @@ class PointServiceTest {
     }
 
     @Test
-    void 포인트충전_실패_최대잔고초과() {
+    void 포인트충전_실패_최대잔고초과() throws InterruptedException {
+        when(pointLockService.executeWithLock(eq(1L), any(Callable.class)))
+                .thenAnswer(invocation -> {
+                    Callable<UserPoint> task = invocation.getArgument(1);
+                    return task.call();
+                });
         UserPoint userPoint = new UserPoint(1L, 1000, System.currentTimeMillis());
         when(userPointTable.selectById(1L)).thenReturn(userPoint);
 
-        assertThrows(MaximumPointExceededException.class, () -> {
-            pointService.chargeUserPoint(1L, 4500);
-        });
+        assertThrows(MaximumPointExceededException.class, () -> pointService.chargeUserPoint(1L, 5_000_000L));
     }
 
 
@@ -101,8 +113,6 @@ class PointServiceTest {
         UserPoint userPoint = new UserPoint(1L, 1000, System.currentTimeMillis());
         when(userPointTable.selectById(1L)).thenReturn(userPoint);
 
-        assertThrows(InsufficientPointBalanceException.class, () -> {
-            pointService.usePoint(1L, 1500);
-        });
+        assertThrows(InsufficientPointBalanceException.class, () -> pointService.usePoint(1L, 1500));
     }
 }
