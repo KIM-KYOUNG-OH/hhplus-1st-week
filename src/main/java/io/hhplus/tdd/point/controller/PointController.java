@@ -1,63 +1,71 @@
 package io.hhplus.tdd.point.controller;
 
-import io.hhplus.tdd.point.model.ChargeRequest;
-import io.hhplus.tdd.point.model.PointHistory;
-import io.hhplus.tdd.point.model.UserPoint;
+import io.hhplus.tdd.point.entity.PointHistory;
+import io.hhplus.tdd.point.entity.UserPoint;
+import io.hhplus.tdd.point.model.*;
 import io.hhplus.tdd.point.service.PointService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/point")
 @RequiredArgsConstructor
 public class PointController {
 
-    private static final Logger log = LoggerFactory.getLogger(PointController.class);
     private final PointService pointService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     /**
      * 특정 유저의 포인트를 조회
      */
     @GetMapping("{id}")
-    public UserPoint point(
+    public PointDto.Response point(
             @PathVariable(name = "id") long id
     ) {
-        return pointService.findUserPointBy(id);
+        UserPoint userPoint = pointService.findUserPointBy(id);
+        return modelMapper.map(userPoint, PointDto.Response.class);
     }
 
     /**
      * 특정 유저의 포인트 충전/이용 내역을 조회
      */
     @GetMapping("{id}/histories")
-    public List<PointHistory> history(
+    public List<PointHistoryDto.Response> history(
             @PathVariable(name = "id") long id
     ) {
-        return pointService.findPointHistoriesBy(id);
+        List<PointHistory> pointHistories = pointService.findPointHistoriesBy(id);
+        return pointHistories.stream()
+                .map(h -> modelMapper.map(h, PointHistoryDto.Response.class))
+                .collect(Collectors.toList());
     }
 
     /**
      * 특정 유저의 포인트를 충전
      */
     @PatchMapping("{id}/charge")
-    public UserPoint charge(
+    public ChargeDto.Response charge(
             @PathVariable(name = "id") long id,
-            @RequestBody ChargeRequest chargeRequest
+            @RequestBody ChargeDto.Request request
     ) {
-        return pointService.chargeUserPoint(id, chargeRequest.getAmount());
+        UserPoint userPoint = pointService.chargeUserPoint(id, request.getAmount());
+        return modelMapper.map(userPoint, ChargeDto.Response.class);
     }
 
     /**
      * 특정 유저의 포인트를 사용
      */
     @PatchMapping("{id}/use")
-    public UserPoint use(
+    public UserDto.Response use(
             @PathVariable(name = "id") long id,
-            @RequestBody ChargeRequest chargeRequest
+            @RequestBody UserDto.Request request
     ) {
-        return pointService.usePoint(id, chargeRequest.getAmount());
+        UserPoint userPoint = pointService.usePoint(id, request.getAmount());
+        return modelMapper.map(userPoint, UserDto.Response.class);
     }
 }

@@ -4,9 +4,9 @@ import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.exception.InsufficientPointBalanceException;
 import io.hhplus.tdd.point.exception.MaximumPointExceededException;
-import io.hhplus.tdd.point.model.PointHistory;
-import io.hhplus.tdd.point.model.TransactionType;
-import io.hhplus.tdd.point.model.UserPoint;
+import io.hhplus.tdd.point.entity.PointHistory;
+import io.hhplus.tdd.point.entity.TransactionType;
+import io.hhplus.tdd.point.entity.UserPoint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,7 +43,7 @@ class PointServiceTest {
 
         UserPoint result = pointService.findUserPointBy(1L);
 
-        assertEquals(1000, result.point());
+        assertEquals(1000, result.getPoint());
         verify(userPointTable, times(1)).selectById(1L);
     }
 
@@ -57,7 +57,7 @@ class PointServiceTest {
         List<PointHistory> result = pointService.findPointHistoriesBy(1L);
 
         assertEquals(1, result.size());
-        assertEquals(1000, result.get(0).amount());
+        assertEquals(1000, result.get(0).getAmount());
         verify(pointHistoryTable, times(1)).selectAllByUserId(1L);
     }
 
@@ -71,11 +71,11 @@ class PointServiceTest {
         UserPoint userPoint = new UserPoint(1L, 1000, System.currentTimeMillis());
         UserPoint postUserPoint = new UserPoint(1L, 1500, System.currentTimeMillis());
         when(userPointTable.selectById(1L)).thenReturn(userPoint);
-        when(userPointTable.insertOrUpdate(1L, postUserPoint.point())).thenReturn(postUserPoint);
+        when(userPointTable.insertOrUpdate(1L, postUserPoint.getPoint())).thenReturn(postUserPoint);
 
         UserPoint result = pointService.chargeUserPoint(1L, 500);
 
-        assertEquals(1500, result.point());
+        assertEquals(1500, result.getPoint());
         verify(userPointTable, times(1)).selectById(1L);
         verify(userPointTable, times(1)).insertOrUpdate(1L, 1500);
     }
@@ -99,11 +99,11 @@ class PointServiceTest {
         UserPoint userPoint = new UserPoint(1L, 1000, System.currentTimeMillis());
         UserPoint postUserPoint = new UserPoint(1L, 700, System.currentTimeMillis());
         when(userPointTable.selectById(1L)).thenReturn(userPoint);
-        when(userPointTable.insertOrUpdate(1L, postUserPoint.point())).thenReturn(postUserPoint);
+        when(userPointTable.insertOrUpdate(1L, postUserPoint.getPoint())).thenReturn(postUserPoint);
 
         UserPoint result = pointService.usePoint(1L, 300);
 
-        assertEquals(700, result.point());
+        assertEquals(700, result.getPoint());
         verify(userPointTable, times(1)).selectById(1L);
         verify(userPointTable, times(1)).insertOrUpdate(1L, 700);
     }

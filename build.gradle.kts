@@ -24,6 +24,7 @@ dependencyManagement {
 dependencies {
     implementation(libs.spring.boot.starter.web)
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.modelmapper:modelmapper:3.2.2")
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
     annotationProcessor(libs.spring.boot.configuration.processor)

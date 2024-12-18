@@ -1,4 +1,4 @@
-package io.hhplus.tdd.point.model;
+package io.hhplus.tdd.point.entity;
 
 
 /**

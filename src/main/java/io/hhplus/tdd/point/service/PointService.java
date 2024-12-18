@@ -4,9 +4,9 @@ import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.exception.InsufficientPointBalanceException;
 import io.hhplus.tdd.point.exception.MaximumPointExceededException;
-import io.hhplus.tdd.point.model.PointHistory;
-import io.hhplus.tdd.point.model.TransactionType;
-import io.hhplus.tdd.point.model.UserPoint;
+import io.hhplus.tdd.point.entity.PointHistory;
+import io.hhplus.tdd.point.entity.TransactionType;
+import io.hhplus.tdd.point.entity.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +38,7 @@ public class PointService {
         try {
             return pointLockService.executeWithLock(userId, () -> {
                 UserPoint findUserPoint = userPointTable.selectById(userId);
-                long postAmount = findUserPoint.point() + amount;
+                long postAmount = findUserPoint.getPoint() + amount;
                 if (postAmount > MAX_USER_POINT) {
                     throw new MaximumPointExceededException("Exceed maximum user point limit");
                 }
@@ -56,7 +56,7 @@ public class PointService {
 
     public UserPoint usePoint(long userId, long amount) {
         UserPoint findUserPoint = userPointTable.selectById(userId);
-        long postAmount = findUserPoint.point() - amount;
+        long postAmount = findUserPoint.getPoint() - amount;
         if (postAmount < MIN_USER_POINT) {
             throw new InsufficientPointBalanceException("Point balance is not enough");
         }
