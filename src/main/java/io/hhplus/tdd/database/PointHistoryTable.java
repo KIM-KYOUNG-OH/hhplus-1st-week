@@ -1,8 +1,8 @@
 package io.hhplus.tdd.database;
 
 
-import io.hhplus.tdd.point.PointHistory;
-import io.hhplus.tdd.point.TransactionType;
+import io.hhplus.tdd.point.entity.PointHistory;
+import io.hhplus.tdd.point.entity.TransactionType;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class PointHistoryTable {
     }
 
     public List<PointHistory> selectAllByUserId(long userId) {
-        return table.stream().filter(pointHistory -> pointHistory.userId() == userId).toList();
+        return table.stream().filter(pointHistory -> pointHistory.getUserId() == userId).toList();
     }
 
     private void throttle(long millis) {
